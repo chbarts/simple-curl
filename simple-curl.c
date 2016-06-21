@@ -8,7 +8,7 @@ extern int optind;
 
 static void version(void)
 {
-    puts("simple-curl2 version 0.1");
+    puts("simple-curl version 0.1");
     puts("Copyright 2012, Chris Barts");
     puts("Licensed under the GNU General Public License, version 3.0 or, at your option, any later version.");
     puts("This software has NO WARRANTY, even for USABILITY or FITNESS FOR A PARTICULAR PURPOSE.");
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
 
     if (ofn) {
         if (!(ofh = fopen(ofn, "ab"))) {
-            perror("simple-curl2: failed to open output file");
+            perror("simple-curl: failed to open output file");
             curl_easy_cleanup(curl);
             exit(EXIT_FAILURE);
         }
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
 
     if (dfn) {
         if (!(dfh = fopen(dfn, "ab"))) {
-            perror("simple-curl2: failed to open dump file");
+            perror("simple-curl: failed to open dump file");
             curl_easy_cleanup(curl);
             if (ofh != stdout)
                 fclose(ofh);
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
         fclose(dfh);
 
     if (res != 0) {
-        fprintf(stderr, "simple-curl2: curl error: %s\n", errbuf);
+        fprintf(stderr, "simple-curl: curl error: %s\n", errbuf);
         exit(EXIT_FAILURE);
     }
 
