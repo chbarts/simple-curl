@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     CURL *curl;
     char *url, *pnam, *ofn = NULL, *dfn = NULL;
     char errbuf[CURL_ERROR_SIZE];
-    int c, lind;
+    int c, lind, res;
     struct option longopts[] = {
         {"out", 1, 0, 0},
         {"dump", 1, 0, 0},
@@ -45,13 +45,6 @@ int main(int argc, char *argv[])
         printf("%s: [options...] url\n", pnam);
         exit(EXIT_SUCCESS);
     }
-
-    if (!(curl = curl_easy_init())) {
-        fprintf(stderr, "simple-curl: curl_easy_init() failed\n");
-        exit(EXIT_FAILURE);
-    }
-
-    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
 
     while ((c = getopt_long(argc, argv, "o:d:hv", longopts, &lind)) != -1) {
         switch (c) {
@@ -95,11 +88,16 @@ int main(int argc, char *argv[])
 
     if (optind >= argc) {
         fprintf(stderr, "%s: URL required\n", pnam);
-        curl_easy_cleanup(curl);
+        exit(EXIT_FAILURE);
+    }
+
+    if (!(curl = curl_easy_init())) {
+        fprintf(stderr, "simple-curl: curl_easy_init() failed\n");
         exit(EXIT_FAILURE);
     }
 
     url = argv[optind];
+    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
     curl_easy_setopt(curl, CURLOPT_URL, url);
 
     if (ofn) {
@@ -124,20 +122,16 @@ int main(int argc, char *argv[])
 
     curl_easy_setopt(curl, CURLOPT_WRITEHEADER, dfh);
 
-    if (curl_easy_perform(curl) != 0) {
+    res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+    if (ofh != stdout)
+        fclose(ofh);
+    if (dfh != stderr)
+        fclose(dfh);
+
+    if (res != 0) {
         fprintf(stderr, "simple-curl2: curl error: %s\n", errbuf);
-        curl_easy_cleanup(curl);
-        if (ofh != stdout)
-            fclose(ofh);
-        if (dfh != stderr)
-            fclose(dfh);
         exit(EXIT_FAILURE);
-    } else {
-        curl_easy_cleanup(curl);
-        if (ofh != stdout)
-            fclose(ofh);
-        if (dfh != stderr)
-            fclose(dfh);
     }
 
     exit(EXIT_SUCCESS);
